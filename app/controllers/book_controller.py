@@ -1,6 +1,8 @@
 from flask import request
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, fields
 from typing import Dict, Any
+
+from flask import Blueprint
 
 from app.services.book_service import book_service
 from app.schemas.book_schemas import BookCreateSchema, BookUpdateSchema, BookResponseSchema
@@ -9,9 +11,56 @@ from app.schemas.book_schemas import BookCreateSchema, BookUpdateSchema, BookRes
 book_ns = Namespace('books', description='Book operations')
 
 
+book_create_model = book_ns.model(
+    "BookCreate",
+    {
+        "title": fields.String(required=True),
+        "description": fields.String,
+        "price": fields.Float(required=True),
+        "release_date": fields.String(description="YYYY-MM-DD"),
+        "author_id": fields.Integer(required=True),
+        "category_id": fields.Integer(required=True),
+        "stock": fields.Integer(required=True),
+        "creator": fields.String(required=True),
+    },
+)
+
+book_update_model = book_ns.model(
+    "BookUpdate",
+    {
+        "title": fields.String,
+        "description": fields.String,
+        "price": fields.Float,
+        "release_date": fields.String(description="YYYY-MM-DD"),
+        "author_id": fields.Integer,
+        "category_id": fields.Integer,
+        "stock": fields.Integer,
+        "creator": fields.String,
+    },
+)
+
+book_model = book_ns.model(
+    "Book",
+    {
+        "id": fields.Integer(readOnly=True),
+        "title": fields.String(required=True),
+        "description": fields.String,
+        "release_date": fields.String(description="YYYY-MM-DD"),
+        "price": fields.Float,
+        "author_id": fields.Integer(required=True),
+        "category_id": fields.Integer(required=True),
+        "stock": fields.Integer,
+        "creator": fields.String,
+    },
+)
+
 @book_ns.route('')
 class BookList(Resource):
-    @book_ns.doc('create_book')
+    @book_ns.doc('create_book')  # Documents this endpoint in Swagger UI with the name 'create_book'
+    @book_ns.expect(book_create_model)  # Specifies that this endpoint expects a request body matching book_create_model
+    @book_ns.marshal_with(book_model, code=201)  # Serializes the response using book_model and sets 201 status code
+    @book_ns.response(400, 'Validation Error')  # Documents that this endpoint may return a 400 error
+    @book_ns.response(500, 'Internal Server Error')  # Documents that this endpoint may return a 500 error
     def post(self):
         """Create a new book"""
         try:
@@ -27,40 +76,42 @@ class BookList(Resource):
         except Exception as e:
             return {'error': 'Failed to create book'}, 500
 
-    @book_ns.doc('list_books')
+    @book_ns.doc('list_books')  # Documents this endpoint in Swagger UI with the name 'list_books'
+    @book_ns.marshal_with(book_model)  # Serializes the response using book_model
+    @book_ns.response(500, 'Internal Server Error')  # Documents that this endpoint may return a 500 error
     def get(self):
         """List books with optional filtering and pagination"""
         try:
-            # # Extract query parameters
-            # page = request.args.get('page', 1, type=int)
-            # per_page = request.args.get('per_page', 10, type=int)
-            # author_id = request.args.get('author_id', type=int)
-            # category_id = request.args.get('category_id', type=int)
-            # search = request.args.get('search', type=str)
+            # Extract query parameters
+            page = request.args.get('page', 1, type=int)
+            per_page = request.args.get('per_page', 10, type=int)
+            author_id = request.args.get('author_id', type=int)
+            category_id = request.args.get('category_id', type=int)
+            search = request.args.get('search', type=str)
             
-            # # Validate pagination parameters
-            # if page < 1:
-            #     page = 1
-            # if per_page < 1 or per_page > 100:
-            #     per_page = 10
+            # Validate pagination parameters
+            if page < 1:
+                page = 1
+            if per_page < 1 or per_page > 100:
+                per_page = 10
                 
-            # books, total = BookService.get_books_paginated(
-            #     page=page,
-            #     per_page=per_page,
-            #     author_id=author_id,
-            #     category_id=category_id,
-            #     search=search
-            # )
+            books, total = book_service.get_books_paginated(
+                page=page,
+                per_page=per_page,
+                author_id=author_id,
+                category_id=category_id,
+                search=search
+            )
             
-            # return {
-            #     'books': [BookResponseSchema().dump(book) for book in books],
-            #     'pagination': {
-            #         'page': page,
-            #         'per_page': per_page,
-            #         'total': total,
-            #         'pages': (total + per_page - 1) // per_page
-            #     }
-            # }
+            return {
+                'books': [BookResponseSchema().dump(book) for book in books],
+                'pagination': {
+                    'page': page,
+                    'per_page': per_page,
+                    'total': total,
+                    'pages': (total + per_page - 1) // per_page
+                }
+            }
             books = book_service.get_books()
             return {
                 'books': [BookResponseSchema().dump(book) for book in books]
@@ -72,7 +123,10 @@ class BookList(Resource):
 
 @book_ns.route('/<int:book_id>')
 class Book(Resource):
-    @book_ns.doc('get_book')
+    @book_ns.doc('get_book')  # Documents this endpoint in Swagger UI with the name 'get_book'
+    @book_ns.marshal_with(book_model)  # Serializes the response using book_model
+    @book_ns.response(404, 'Book not found')  # Documents that this endpoint may return a 404 error
+    @book_ns.response(500, 'Internal Server Error')  # Documents that this endpoint may return a 500 error
     def get(self, book_id):
         """Get specific book details"""
         try:
@@ -83,9 +137,14 @@ class Book(Resource):
         except Exception as e:
             return {'error': 'Failed to retrieve book'}, 500
 
-    @book_ns.doc('update_book')
+    @book_ns.doc('update_book')  # Documents this endpoint in Swagger UI with the name 'update_book'
+    @book_ns.expect(book_update_model)  # Specifies that this endpoint expects a request body matching book_update_model
+    @book_ns.marshal_with(book_model)  # Serializes the response using book_model
+    @book_ns.response(400, 'Validation Error')  # Documents that this endpoint may return a 400 error
+    @book_ns.response(404, 'Book not found')  # Documents that this endpoint may return a 404 error
+    @book_ns.response(500, 'Internal Server Error')  # Documents that this endpoint may return a 500 error
     def patch(self, book_id):
-        """Update book details (admin only)"""
+        """Update book details"""
         try:
             data = request.get_json()
             # Validate with existing Marshmallow schema
