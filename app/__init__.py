@@ -23,9 +23,11 @@ def create_app(config_object: str | None = None) -> Flask:
     migrate.init_app(app, db)
     api.init_app(app)
 
-    # Import controllers to register namespaces
-    with app.app_context():
-        from app.controllers import book_controller  # noqa: F401
+    # # Import controllers to register namespaces
+    # with app.app_context():
+    #     from app.controllers import book_controller  # noqa: F401
+    from app.controllers import book_controller
+    api.add_namespace(book_controller.book_ns, path='/api/books')
 
     return app
 
