@@ -1,29 +1,15 @@
 from typing import List, Tuple, Optional
 from app.models.book import Book
-from app.models.author import Author
-from app.models.category import Category
 from app.repositories.book_repository import BookRepository
-from app.repositories.author_repository import AuthorRepository
-from app.repositories.category_repository import CategoryRepository
 
 
 class BookService:
     def __init__(self):
         self.book_repository = BookRepository()
-        self.author_repository = AuthorRepository()
-        self.category_repository = CategoryRepository()
 
     def create_book(self, data: dict) -> Book:
         """Create a new book with validation"""
         # Validate author exists
-        author = self.author_repository.get_by_id(data.get('author_id'))
-        if not author:
-            raise ValueError("Author not found")
-        
-        # Validate category exists
-        category = self.category_repository.get_by_id(data.get('category_id'))
-        if not category:
-            raise ValueError("Category not found")
         
         # Create book instance
         book = Book(
@@ -31,8 +17,8 @@ class BookService:
             description=data.get('description'),
             release_date=data.get('release_date'),
             price=data.get('price'),
-            author_id=data['author_id'],
-            category_id=data['category_id'],
+            author=data['author'],
+            category=data['category'],
             stock=data.get('stock', 0),
             creator=data.get('creator', 'System')
         )
@@ -47,16 +33,16 @@ class BookService:
         self, 
         page: int = 1, 
         per_page: int = 10,
-        author_id: Optional[int] = None,
-        category_id: Optional[int] = None,
+        author: Optional[int] = None,
+        category: Optional[int] = None,
         search: Optional[str] = None
     ) -> Tuple[List[Book], int]:
         """Get paginated books with optional filtering"""
         paginated_books, total = self.book_repository.get_paginated(
             page=page,
             per_page=per_page,
-            author_id=author_id,
-            category_id=category_id,
+            author=author,
+            category=category,
             search=search
         )
         return paginated_books, total

@@ -74,14 +74,10 @@ def create_app(config_object=None) -> Flask:
 
     from app.controllers import (
         book_controller, 
-        user_controller, 
-        author_controller, 
-        category_controller
+        user_controller
     )
     api.add_namespace(book_controller.book_ns, path='/api/books')
     api.add_namespace(user_controller.user_ns, path='/api/users')
-    api.add_namespace(author_controller.author_ns, path='/api/authors')
-    api.add_namespace(category_controller.category_ns, path='/api/categories')
     return app
 
 
