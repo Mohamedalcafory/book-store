@@ -108,6 +108,7 @@ class BookList(Resource):
     def get(self):
         """List books with optional filtering and pagination"""
         try:
+            print("get books")
             # Extract query parameters
             page = request.args.get('page', 1, type=int)
             per_page = request.args.get('per_page', 10, type=int)
