@@ -1,8 +1,11 @@
 import os
+from environs import Env
 
+env = Env()
+env.read_env()
 
 class BaseConfig:
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///library.db")
+    SQLALCHEMY_DATABASE_URI = env.str("DATABASE_URL", "sqlite:///library.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class DevelopmentConfig(BaseConfig):
