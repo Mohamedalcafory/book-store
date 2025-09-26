@@ -9,8 +9,8 @@ class BookCreateSchema(Schema):
     description = fields.Str(allow_none=True, validate=validate.Length(max=1000))
     release_date = fields.Date(allow_none=True)
     price = fields.Float(allow_none=True, validate=validate.Range(min=0))
-    author_id = fields.Int(required=True, validate=validate.Range(min=1))
-    category_id = fields.Int(required=True, validate=validate.Range(min=1))
+    author = fields.Str(required=True, validate=validate.Length(min=1, max=200))
+    category = fields.Str(required=True, validate=validate.Length(min=1, max=100))
     stock = fields.Int(validate=validate.Range(min=0))
     creator = fields.Str(validate=validate.Length(max=120))
 
@@ -27,8 +27,8 @@ class BookUpdateSchema(Schema):
     description = fields.Str(allow_none=True, validate=validate.Length(max=1000))
     release_date = fields.Date(allow_none=True)
     price = fields.Float(allow_none=True, validate=validate.Range(min=0))
-    author_id = fields.Int(validate=validate.Range(min=1))
-    category_id = fields.Int(validate=validate.Range(min=1))
+    author = fields.Str(validate=validate.Length(min=1, max=200))
+    category = fields.Str(validate=validate.Length(min=1, max=100))
     stock = fields.Int(validate=validate.Range(min=0))
     creator = fields.Str(validate=validate.Length(max=120))
 
@@ -46,28 +46,12 @@ class BookResponseSchema(Schema):
     description = fields.Str()
     release_date = fields.Date()
     price = fields.Float()
-    author_id = fields.Int()
-    category_id = fields.Int()
+    author = fields.Str()
+    category = fields.Str()
     stock = fields.Int()
     creator = fields.Str()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
-    
-    # Include related data
-    author_name = fields.Method('get_author_name')
-    category_name = fields.Method('get_category_name')
-
-    def get_author_name(self, obj):
-        """Get author name from related author object"""
-        if hasattr(obj, 'author') and obj.author:
-            return obj.author.name
-        return None
-
-    def get_category_name(self, obj):
-        """Get category name from related category object"""
-        if hasattr(obj, 'category') and obj.category:
-            return obj.category.name
-        return None
 
 
 class BookListResponseSchema(Schema):
@@ -79,7 +63,7 @@ class BookListResponseSchema(Schema):
 class BookSearchSchema(Schema):
     """Schema for book search parameters"""
     query = fields.Str(validate=validate.Length(min=1, max=100))
-    author_id = fields.Int(validate=validate.Range(min=1))
-    category_id = fields.Int(validate=validate.Range(min=1))
+    author = fields.Str(validate=validate.Length(min=1, max=200))
+    category = fields.Str(validate=validate.Length(min=1, max=100))
     page = fields.Int(validate=validate.Range(min=1))
     per_page = fields.Int(validate=validate.Range(min=1, max=100))

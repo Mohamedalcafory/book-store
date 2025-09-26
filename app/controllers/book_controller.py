@@ -19,8 +19,8 @@ book_create_model = book_ns.model(
         "description": fields.String,
         "price": fields.Float(required=True),
         "release_date": fields.String(description="YYYY-MM-DD"),
-        "author_id": fields.Integer(required=True),
-        "category_id": fields.Integer(required=True),
+        "author": fields.String(required=True),
+        "category": fields.String(required=True),
         "stock": fields.Integer(required=True),
         "creator": fields.String(required=True),
     },
@@ -33,8 +33,8 @@ book_update_model = book_ns.model(
         "description": fields.String,
         "price": fields.Float,
         "release_date": fields.String(description="YYYY-MM-DD"),
-        "author_id": fields.Integer,
-        "category_id": fields.Integer,
+        "author": fields.String,
+        "category": fields.String,
         "stock": fields.Integer,
         "creator": fields.String,
     },
@@ -48,8 +48,8 @@ book_model = book_ns.model(
         "description": fields.String,
         "release_date": fields.String(description="YYYY-MM-DD"),
         "price": fields.Float,
-        "author_id": fields.Integer(required=True),
-        "category_id": fields.Integer(required=True),
+        "author": fields.String(required=True),
+        "category": fields.String(required=True),
         "stock": fields.Integer,
         "creator": fields.String,
     },
@@ -107,8 +107,8 @@ class BookList(Resource):
     @book_ns.response(500, 'Internal Server Error')  # Documents that this endpoint may return a 500 error
     @book_ns.param('page', 'Page number', type=int, default=1)
     @book_ns.param('per_page', 'Items per page (max 100)', type=int, default=10)
-    @book_ns.param('author_id', 'Filter by author ID', type=int)
-    @book_ns.param('category_id', 'Filter by category ID', type=int)
+    @book_ns.param('author', 'Filter by author name', type=str)
+    @book_ns.param('category', 'Filter by category name', type=str)
     @book_ns.param('search', 'Search books by title', type=str)
     @jwt_required()
     def get(self):
@@ -118,8 +118,8 @@ class BookList(Resource):
             # Extract query parameters
             page = request.args.get('page', 1, type=int)
             per_page = request.args.get('per_page', 10, type=int)
-            author_id = request.args.get('author_id', type=int)
-            category_id = request.args.get('category_id', type=int)
+            author = request.args.get('author', type=str)
+            category = request.args.get('category', type=str)
             search = request.args.get('search', type=str)
             
             # Validate pagination parameters
@@ -131,8 +131,8 @@ class BookList(Resource):
             books, total = book_service.get_books_paginated(
                 page=page,
                 per_page=per_page,
-                author_id=author_id,
-                category_id=category_id,
+                author=author,
+                category=category,
                 search=search
             )
             schema = BookResponseSchema(many=True)

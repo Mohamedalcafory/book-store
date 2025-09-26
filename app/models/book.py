@@ -11,13 +11,8 @@ class Book(db.Model):
     description = db.Column(db.Text, nullable=True)
     release_date = db.Column(db.Date, nullable=True)
     price = db.Column(db.Float, nullable=True)
-    author_id = db.Column(db.Integer, db.ForeignKey("authors.id"), nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=False)
-
-    author_id = db.Column(db.Integer, db.ForeignKey("authors.id"), nullable=False)
-    author = db.relationship("Author", back_populates="books")
-    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=False)
-    category = db.relationship("Category", back_populates="books")
+    author = db.Column(db.String(200), nullable=False)
+    category = db.Column(db.String(100), nullable=False)
     stock = db.Column(db.Integer, nullable=False)
     creator = db.Column(db.String(120), nullable=False)
 

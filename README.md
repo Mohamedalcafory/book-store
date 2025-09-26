@@ -182,8 +182,8 @@ curl -X POST "http://localhost:5000/api/books" \
     "title": "The Great Gatsby",
     "description": "A classic American novel",
     "price": 12.99,
-    "author_id": 1,
-    "category_id": 1,
+    "author": Omar,
+    "category": Fiction,
     "stock": 50,
     "creator": "admin"
   }'

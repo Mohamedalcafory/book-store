@@ -30,17 +30,22 @@ class BookRepository:
         self,
         page: int = 1,
         per_page: int = 10,
-        author_id: Optional[int] = None,
-        category_id: Optional[int] = None,
+        author: Optional[str] = None,
+        category: Optional[str] = None,
         search: Optional[str] = None
     ) -> Tuple[List[Book], int]:
         query = Book.query
-        if author_id:
-            query = query.filter(Book.author_id == author_id)
-        if category_id:
-            query = query.filter(Book.category_id == category_id)
+        if author:
+            query = query.filter(Book.author.ilike(f"%{author}%"))
+        if category:
+            query = query.filter(Book.category.ilike(f"%{category}%"))
         if search:
-            query = query.filter(Book.title.ilike(f"%{search}%"))
+            query = query.filter(
+                Book.title.ilike(f"%{search}%") |
+                Book.description.ilike(f"%{search}%") |
+                Book.author.ilike(f"%{search}%") |
+                Book.category.ilike(f"%{search}%")
+            )
         response = query.paginate(
             page=page, 
             per_page=per_page, 
