@@ -79,6 +79,10 @@ class BookService:
         
         return paginated_books, total
 
+    def get_books(self) -> List[Book]:
+        """Get all books"""
+        return self.book_repository.list_all()
+
     def update_book(self, book_id: int, data: dict) -> Optional[Book]:
         """Update a book with validation"""
         book = self.book_repository.get_by_id(book_id)
@@ -133,3 +137,5 @@ class BookService:
             if query_lower in book.title.lower() or
                (book.description and query_lower in book.description.lower())
         ]
+
+book_service = BookService()

@@ -15,7 +15,11 @@ class BookRepository:
         return db.session.get(Book, book_id)
 
     def list_all(self) -> list[Book]:
-        return Book.query.order_by(Book.id.asc()).all()
+        print("BookRepository")
+        books = Book.query.all()
+        return books
+        # print(Book.query.order_by(Book.id.asc()).all())
+        # return Book.query.order_by(Book.id.asc()).all()
 
     def update(self, book: Book) -> Book:
         db.session.commit()
