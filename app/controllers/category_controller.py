@@ -1,12 +1,13 @@
 from flask import request
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required
 from typing import Dict, Any
 
 from app.services.category_service import category_service
 from app.schemas.category_schemas import CategoryCreateSchema, CategoryUpdateSchema, CategoryResponseSchema
 
 # Create namespace for Swagger documentation
-category_ns = Namespace('categories', description='Category operations')
+category_ns = Namespace('categories', description='Category operations', security='Bearer Auth')
 
 
 category_create_model = category_ns.model(
@@ -62,11 +63,13 @@ category_list_model = category_ns.model(
 
 @category_ns.route('')
 class CategoryList(Resource):
-    @category_ns.doc('create_category')
+    @category_ns.doc('create_category', security='Bearer Auth')
     @category_ns.expect(category_create_model)
     @category_ns.marshal_with(category_model, code=201)
     @category_ns.response(400, 'Validation Error')
+    @category_ns.response(401, 'Authentication required')
     @category_ns.response(500, 'Internal Server Error')
+    @jwt_required()
     def post(self):
         """Create a new category"""
         try:
@@ -83,12 +86,14 @@ class CategoryList(Resource):
             print(f"Error in {category_ns.name} namespace:", e)
             return {'error': 'Failed to create category'}, 500
 
-    @category_ns.doc('list_categories')
+    @category_ns.doc('list_categories', security='Bearer Auth')
     @category_ns.marshal_with(category_list_model)
+    @category_ns.response(401, 'Authentication required')
     @category_ns.response(500, 'Internal Server Error')
     @category_ns.param('page', 'Page number', type=int, default=1)
     @category_ns.param('per_page', 'Items per page (max 100)', type=int, default=10)
     @category_ns.param('search', 'Search categories by name', type=str)
+    @jwt_required()
     def get(self):
         """List categories with optional filtering and pagination"""
         try:
@@ -130,10 +135,12 @@ class CategoryList(Resource):
 @category_ns.route('/<int:category_id>')
 @category_ns.param('category_id', 'The category identifier', type=int)
 class Category(Resource):
-    @category_ns.doc('get_category')
+    @category_ns.doc('get_category', security='Bearer Auth')
     @category_ns.marshal_with(category_model)
+    @category_ns.response(401, 'Authentication required')
     @category_ns.response(404, 'Category not found')
     @category_ns.response(500, 'Internal Server Error')
+    @jwt_required()
     def get(self, category_id):
         """Get specific category details"""
         try:
@@ -144,12 +151,14 @@ class Category(Resource):
         except Exception as e:
             return {'error': 'Failed to retrieve category'}, 500
 
-    @category_ns.doc('update_category')
+    @category_ns.doc('update_category', security='Bearer Auth')
     @category_ns.expect(category_update_model)
     @category_ns.marshal_with(category_model)
     @category_ns.response(400, 'Validation Error')
+    @category_ns.response(401, 'Authentication required')
     @category_ns.response(404, 'Category not found')
     @category_ns.response(500, 'Internal Server Error')
+    @jwt_required()
     def patch(self, category_id):
         """Update category details"""
         try:
@@ -168,11 +177,13 @@ class Category(Resource):
         except Exception as e:
             return {'error': 'Failed to update category'}, 500
 
-    @category_ns.doc('delete_category')
+    @category_ns.doc('delete_category', security='Bearer Auth')
     @category_ns.response(204, 'Category deleted successfully')
     @category_ns.response(400, 'Cannot delete category with books')
+    @category_ns.response(401, 'Authentication required')
     @category_ns.response(404, 'Category not found')
     @category_ns.response(500, 'Internal Server Error')
+    @jwt_required()
     def delete(self, category_id):
         """Delete a category"""
         try:

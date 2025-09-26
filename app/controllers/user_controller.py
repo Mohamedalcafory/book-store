@@ -160,7 +160,7 @@ class UserLogin(Resource):
 
 @user_ns.route('/profile')
 class UserProfile(Resource):
-    @user_ns.doc('get_user_profile')
+    @user_ns.doc('get_user_profile', security='Bearer Auth')
     @user_ns.marshal_with(user_response_model)
     @user_ns.response(404, 'User not found')
     @user_ns.response(500, 'Internal Server Error')
@@ -179,7 +179,7 @@ class UserProfile(Resource):
         except Exception as e:
             user_ns.abort(500, 'Internal server error')
 
-    @user_ns.doc('update_user_profile')
+    @user_ns.doc('update_user_profile', security='Bearer Auth')
     @user_ns.expect(user_update_model)
     @user_ns.marshal_with(user_response_model)
     @user_ns.response(400, 'Validation Error')
@@ -215,7 +215,7 @@ class UserProfile(Resource):
 
 @user_ns.route('/change-password')
 class PasswordChange(Resource):
-    @user_ns.doc('change_password')
+    @user_ns.doc('change_password', security='Bearer Auth')
     @user_ns.expect(password_change_model)
     @user_ns.response(200, 'Password changed successfully')
     @user_ns.response(400, 'Validation Error')
@@ -256,7 +256,7 @@ class PasswordChange(Resource):
 
 @user_ns.route('/refresh')
 class TokenRefresh(Resource):
-    @user_ns.doc('refresh_token')
+    @user_ns.doc('refresh_token', security='Bearer Auth')
     @user_ns.response(200, 'Token refreshed successfully')
     @user_ns.response(404, 'User not found or inactive')
     @user_ns.response(500, 'Internal Server Error')
@@ -287,7 +287,7 @@ class TokenRefresh(Resource):
 
 @user_ns.route('/logout')
 class UserLogout(Resource):
-    @user_ns.doc('logout_user')
+    @user_ns.doc('logout_user', security='Bearer Auth')
     @user_ns.response(200, 'Logged out successfully')
     @user_ns.response(500, 'Internal Server Error')
     @jwt_required()

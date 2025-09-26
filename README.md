@@ -204,6 +204,32 @@ The application includes Docker configuration for easy deployment:
 docker-compose up --build
 ```
 
+### ⚠️ Important Note for First Dockerized Version (commit f15a07078e034cfd90621a53586898ee823f901f)
+
+The first dockerized version of this application **depends on a MySQL server running on the host machine**, not a MySQL Docker image. This means:
+
+1. **You must have MySQL installed and running on your host machine** (not in Docker)
+2. **MySQL must be configured to accept connections from Docker containers**
+3. **The application connects to MySQL via `host.docker.internal:3306`**
+4. **Intialize your database with init.sql script**
+5. **Run `flask db upgrade` for updating your database**
+
+#### Prerequisites for Docker Setup:
+- MySQL server installed and running on host machine
+- MySQL user with proper permissions for external connections
+- Database `bookstore` created on the host MySQL instance
+
+#### Alternative: Use Host Networking
+If you prefer to avoid MySQL configuration changes, you can modify `docker-compose.yml` to use host networking:
+```yaml
+services:
+  app:
+    # ... other config
+    network_mode: host
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:admin@localhost:3306/bookstore
+```
+
 ## 📈 Performance Features
 
 - **Pagination**: All list endpoints support pagination
