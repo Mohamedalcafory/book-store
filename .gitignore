@@ -3,5 +3,6 @@
 __pycache__/
 *.pyc
 .venv/
-Study.md
 migrations/versions/*
+Study.md
+USER_SERVICE_README.md
