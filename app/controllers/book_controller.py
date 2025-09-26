@@ -9,7 +9,7 @@ from app.services.book_service import book_service
 from app.schemas.book_schemas import BookCreateSchema, BookUpdateSchema, BookResponseSchema
 
 # Create namespace for Swagger documentation
-book_ns = Namespace('books', description='Book operations', security='Bearer Auth')
+book_ns = Namespace('books', description='Book operations')
 
 
 book_create_model = book_ns.model(
@@ -78,7 +78,7 @@ book_list_model = book_ns.model(
 )
 @book_ns.route('')
 class BookList(Resource):
-    @book_ns.doc('create_book', security='Bearer Auth')  # Documents this endpoint in Swagger UI with the name 'create_book'
+    @book_ns.doc('create_book')  # Documents this endpoint in Swagger UI with the name 'create_book'
     @book_ns.expect(book_create_model)  # Specifies that this endpoint expects a request body matching book_create_model
     @book_ns.marshal_with(book_model, code=201)  # Serializes the response using book_model and sets 201 status code
     @book_ns.response(400, 'Validation Error')  # Documents that this endpoint may return a 400 error
@@ -101,7 +101,7 @@ class BookList(Resource):
         except Exception as e:
             return {'error': 'Failed to create book'}, 500
 
-    @book_ns.doc('list_books', security='Bearer Auth')  # Documents this endpoint in Swagger UI with the name 'list_books'
+    @book_ns.doc('list_books')  # Documents this endpoint in Swagger UI with the name 'list_books'
     @book_ns.marshal_with(book_list_model)  # Serializes the response using book_list_model
     @book_ns.response(401, 'Authentication required')  # Documents that this endpoint requires authentication
     @book_ns.response(500, 'Internal Server Error')  # Documents that this endpoint may return a 500 error
@@ -157,7 +157,7 @@ class BookList(Resource):
 @book_ns.route('/<int:book_id>')
 @book_ns.param('book_id', 'The book identifier', type=int)
 class Book(Resource):
-    @book_ns.doc('get_book', security='Bearer Auth')  # Documents this endpoint in Swagger UI with the name 'get_book'
+    @book_ns.doc('get_book')  # Documents this endpoint in Swagger UI with the name 'get_book'
     @book_ns.marshal_with(book_model)  # Serializes the response using book_model
     @book_ns.response(401, 'Authentication required')  # Documents that this endpoint requires authentication
     @book_ns.response(404, 'Book not found')  # Documents that this endpoint may return a 404 error
@@ -173,7 +173,7 @@ class Book(Resource):
         except Exception as e:
             return {'error': 'Failed to retrieve book'}, 500
 
-    @book_ns.doc('update_book', security='Bearer Auth')  # Documents this endpoint in Swagger UI with the name 'update_book'
+    @book_ns.doc('update_book')  # Documents this endpoint in Swagger UI with the name 'update_book'
     @book_ns.expect(book_update_model)  # Specifies that this endpoint expects a request body matching book_update_model
     @book_ns.marshal_with(book_model)  # Serializes the response using book_model
     @book_ns.response(400, 'Validation Error')  # Documents that this endpoint may return a 400 error

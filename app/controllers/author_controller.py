@@ -7,7 +7,7 @@ from app.services.author_service import author_service
 from app.schemas.author_schemas import AuthorCreateSchema, AuthorUpdateSchema, AuthorResponseSchema
 
 # Create namespace for Swagger documentation
-author_ns = Namespace('authors', description='Author operations', security='Bearer Auth')
+author_ns = Namespace('authors', description='Author operations')
 
 
 author_create_model = author_ns.model(
@@ -69,7 +69,7 @@ author_list_model = author_ns.model(
 
 @author_ns.route('')
 class AuthorList(Resource):
-    @author_ns.doc('create_author', security='Bearer Auth')
+    @author_ns.doc('create_author')
     @author_ns.expect(author_create_model)
     @author_ns.marshal_with(author_model, code=201)
     @author_ns.response(400, 'Validation Error')
@@ -92,7 +92,7 @@ class AuthorList(Resource):
             print(f"Error in {author_ns.name} namespace:", e)
             return {'error': 'Failed to create author'}, 500
 
-    @author_ns.doc('list_authors', security='Bearer Auth')
+    @author_ns.doc('list_authors')
     @author_ns.marshal_with(author_list_model)
     @author_ns.response(401, 'Authentication required')
     @author_ns.response(500, 'Internal Server Error')
@@ -144,7 +144,7 @@ class AuthorList(Resource):
 @author_ns.route('/<int:author_id>')
 @author_ns.param('author_id', 'The author identifier', type=int)
 class Author(Resource):
-    @author_ns.doc('get_author', security='Bearer Auth')
+    @author_ns.doc('get_author')
     @author_ns.marshal_with(author_model)
     @author_ns.response(401, 'Authentication required')
     @author_ns.response(404, 'Author not found')
@@ -160,7 +160,7 @@ class Author(Resource):
         except Exception as e:
             return {'error': 'Failed to retrieve author'}, 500
 
-    @author_ns.doc('update_author', security='Bearer Auth')
+    @author_ns.doc('update_author')
     @author_ns.expect(author_update_model)
     @author_ns.marshal_with(author_model)
     @author_ns.response(400, 'Validation Error')
@@ -186,7 +186,7 @@ class Author(Resource):
         except Exception as e:
             return {'error': 'Failed to update author'}, 500
 
-    @author_ns.doc('delete_author', security='Bearer Auth')
+    @author_ns.doc('delete_author')
     @author_ns.response(204, 'Author deleted successfully')
     @author_ns.response(400, 'Cannot delete author with books')
     @author_ns.response(401, 'Authentication required')

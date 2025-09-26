@@ -10,7 +10,20 @@ db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
 
-api = Api(title="Online Library API", version="1.0", description="Flask-RESTX API for Online Library System")
+api = Api(
+    title="Online Library API", 
+    version="1.0", 
+    description="Flask-RESTX API for Online Library System",
+    security="Bearer Auth",
+    authorizations={
+        'Bearer Auth': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+            'description': 'JWT Authorization header using the Bearer scheme. Example: "Bearer {token}"'
+        }
+    }
+)
 
 
 def create_app(config_object=None) -> Flask:
