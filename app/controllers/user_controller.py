@@ -127,7 +127,6 @@ class UserLogin(Resource):
     @user_ns.expect(user_login_model)
     @user_ns.marshal_with(token_response_model)
     @user_ns.response(400, 'Validation Error')
-    @user_ns.response(401, 'Authentication Error')
     @user_ns.response(500, 'Internal Server Error')
     def post(self):
         """Login user"""

@@ -5,6 +5,7 @@ from flask_restx import Api
 from flask_jwt_extended import JWTManager
 import os
 from dotenv import load_dotenv
+import secrets 
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -46,8 +47,8 @@ def create_app(config_object=None) -> Flask:
     # Initialize JWT
     jwt.init_app(app)
     
-    # Configure JWT
-    app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'your-secret-key-change-in-production')
+        # Configure JWT
+    app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', secrets.token_hex(32))
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False  # We handle expiration in the service
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = False  # We handle expiration in the service
     
