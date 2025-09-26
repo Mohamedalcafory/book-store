@@ -1,11 +1,12 @@
 import os
-from environs import Env
+from dotenv import load_dotenv
 
-env = Env()
-env.read_env()
-
+load_dotenv()
+  
 class BaseConfig:
-    SQLALCHEMY_DATABASE_URI = env.str("DATABASE_URL", "sqlite:///library.db")
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "DATABASE_URL", "mysql+pymysql://root:admin@localhost:3306/bookstore"
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class DevelopmentConfig(BaseConfig):

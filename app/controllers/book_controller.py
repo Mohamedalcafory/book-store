@@ -13,7 +13,7 @@ book_ns = Namespace('books', description='Book operations')
 class BookList(Resource):
     @book_ns.doc('create_book')
     def post(self):
-        """Create a new book (admin only)"""
+        """Create a new book"""
         try:
             data = request.get_json()
             # Validate with existing Marshmallow schema
