@@ -38,9 +38,10 @@ def create_app(config_object=None) -> Flask:
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False  # We handle expiration in the service
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = False  # We handle expiration in the service
 
-    from app.controllers import book_controller, user_controller
+    from app.controllers import book_controller, user_controller, author_controller
     api.add_namespace(book_controller.book_ns, path='/api/books')
     api.add_namespace(user_controller.user_ns, path='/api/users')
+    api.add_namespace(author_controller.author_ns, path='/api/authors')
 
     return app
 
