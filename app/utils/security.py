@@ -55,14 +55,14 @@ class SecurityUtils:
         
         # Create access token (expires in 15 minutes)
         access_token = create_access_token(
-            identity=user_id,
+            identity=str(user_id),
             additional_claims=additional_claims,
             expires_delta=timedelta(minutes=15)
         )
         
         # Create refresh token (expires in 7 days)
         refresh_token = create_refresh_token(
-            identity=user_id,
+            identity=str(user_id),
             additional_claims=additional_claims,
             expires_delta=timedelta(days=7)
         )

@@ -38,19 +38,16 @@ def create_app(config_object=None) -> Flask:
         app.config.from_mapping(
             SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL","sqlite:///library.db"),
             SQLALCHEMY_TRACK_MODIFICATIONS=False,
+            JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY', "127721960582844795764816642902295266977"),
+            JWT_ACCESS_TOKEN_EXPIRES=False,
+            JWT_REFRESH_TOKEN_EXPIRES=False
         )
 
     db.init_app(app)
     migrate.init_app(app, db)
     api.init_app(app)
-    
-    # Initialize JWT
     jwt.init_app(app)
-    
-        # Configure JWT
-    app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', secrets.token_hex(32))
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False  # We handle expiration in the service
-    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = False  # We handle expiration in the service
+
     
     # JWT Error Handlers
     @jwt.expired_token_loader
