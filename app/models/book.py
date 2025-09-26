@@ -15,6 +15,7 @@ class Book(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=False)
 
     author_id = db.Column(db.Integer, db.ForeignKey("authors.id"), nullable=False)
+    author = db.relationship("Author", backpopulates="books")
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=False)
     stock = db.Column(db.Integer, nullable=False)
     creator = db.Column(db.String(120), nullable=False)
