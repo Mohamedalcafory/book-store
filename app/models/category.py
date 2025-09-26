@@ -14,7 +14,7 @@ class Category(db.Model):
         db.DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
 
-    books = db.relationship("Book", backpopulates="category", lazy=True)
+    books = db.relationship("Book", back_populates="category", lazy=True)
 
     def __repr__(self) -> str:
         return f"<Category id={self.id} name={self.name!r}>"

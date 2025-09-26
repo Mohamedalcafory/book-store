@@ -16,7 +16,7 @@ class Author(db.Model):
         db.DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
 
-    books = db.relationship("Book", backpopulates="author", lazy=True)
+    books = db.relationship("Book", back_populates="author", lazy=True)
 
     def __repr__(self) -> str:
         return f"<Author id={self.id} name={self.name!r}>"
