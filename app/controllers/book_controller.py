@@ -54,6 +54,27 @@ book_model = book_ns.model(
     },
 )
 
+pagination_model = book_ns.model(
+    "Pagination",
+    {
+        "page": fields.Integer,
+        "per_page": fields.Integer,
+        "total": fields.Integer,
+        "pages": fields.Integer,
+        "has_next": fields.Boolean,
+        "has_prev": fields.Boolean,
+        "next_num": fields.Integer,
+        "prev_num": fields.Integer,
+    },
+)
+
+book_list_model = book_ns.model(
+    "BookList",
+    {
+        "books": fields.Nested(book_model, many=True),
+        "pagination": fields.Nested(pagination_model),
+    },
+)
 @book_ns.route('')
 class BookList(Resource):
     @book_ns.doc('create_book')  # Documents this endpoint in Swagger UI with the name 'create_book'
@@ -77,7 +98,7 @@ class BookList(Resource):
             return {'error': 'Failed to create book'}, 500
 
     @book_ns.doc('list_books')  # Documents this endpoint in Swagger UI with the name 'list_books'
-    @book_ns.marshal_with(book_model)  # Serializes the response using book_model
+    @book_ns.marshal_with(book_list_model)  # Serializes the response using book_list_model
     @book_ns.response(500, 'Internal Server Error')  # Documents that this endpoint may return a 500 error
     def get(self):
         """List books with optional filtering and pagination"""
@@ -102,19 +123,19 @@ class BookList(Resource):
                 category_id=category_id,
                 search=search
             )
-            
+            schema = BookResponseSchema(many=True)
             return {
-                'books': [BookResponseSchema().dump(book) for book in books],
+                'books': schema.dump(books),
                 'pagination': {
-                    'page': page,
-                    'per_page': per_page,
+                    'page': books.page,
+                    'per_page': books.per_page,
                     'total': total,
-                    'pages': (total + per_page - 1) // per_page
+                    'pages': books.pages,
+                    'has_next': books.has_next,
+                    'has_prev': books.has_prev,
+                    'next_num': books.next_num,
+                    'prev_num': books.prev_num,
                 }
-            }
-            books = book_service.get_books()
-            return {
-                'books': [BookResponseSchema().dump(book) for book in books]
             }
         except Exception as e:
             print(f"Error in {book_ns.name} namespace:", e)

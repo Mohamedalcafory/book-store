@@ -52,33 +52,15 @@ class BookService:
         search: Optional[str] = None
     ) -> Tuple[List[Book], int]:
         """Get paginated books with optional filtering"""
-        # This would typically use a more sophisticated query builder
-        # For now, we'll implement basic filtering
-        books = self.book_repository.list_all()
-        
-        # Apply filters
-        if author_id:
-            books = [book for book in books if book.author_id == author_id]
-        
-        if category_id:
-            books = [book for book in books if book.category_id == category_id]
-        
-        if search:
-            search_lower = search.lower()
-            books = [
-                book for book in books 
-                if search_lower in book.title.lower() or 
-                   (book.description and search_lower in book.description.lower())
-            ]
-        
-        # Calculate pagination
-        total = len(books)
-        start = (page - 1) * per_page
-        end = start + per_page
-        paginated_books = books[start:end]
-        
+        paginated_books, total = self.book_repository.get_paginated(
+            page=page,
+            per_page=per_page,
+            author_id=author_id,
+            category_id=category_id,
+            search=search
+        )
         return paginated_books, total
-
+        
     def get_books(self) -> List[Book]:
         """Get all books"""
         return self.book_repository.list_all()
