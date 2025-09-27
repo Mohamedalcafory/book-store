@@ -126,11 +126,13 @@ class BookList(Resource):
             search = request.args.get('search', type=str)
             price = request.args.get('price', type=float)
             release_date = request.args.get('release_date', type=str)
+            
             try:
-                release_date = date.fromisoformat(release_date)
+                if release_date:
+                    release_date = date.fromisoformat(release_date)
             except ValueError:
                 release_date = None
-            print(price, release_date)
+
             # Validate pagination parameters
             if page < 1:
                 page = 1
