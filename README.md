@@ -37,20 +37,6 @@ app/
 - `PATCH /api/books/{id}` - Update book
 - `DELETE /api/books/{id}` - Delete book
 
-### Authors
-- `GET /api/authors` - List authors with pagination and search
-- `POST /api/authors` - Create a new author
-- `GET /api/authors/{id}` - Get author details
-- `PATCH /api/authors/{id}` - Update author
-- `DELETE /api/authors/{id}` - Delete author
-
-### Categories
-- `GET /api/categories` - List categories with pagination and search
-- `POST /api/categories` - Create a new category
-- `GET /api/categories/{id}` - Get category details
-- `PATCH /api/categories/{id}` - Update category
-- `DELETE /api/categories/{id}` - Delete category
-
 ### Users
 - `GET /api/users` - List users (admin only)
 - `POST /api/users` - Register new user
