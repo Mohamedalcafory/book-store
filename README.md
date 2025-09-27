@@ -6,7 +6,7 @@ A REST API for managing an online book store built with Flask, featuring simplif
 
 ### ✅ Implemented Features
 - **Book Management**: Full CRUD operations for books with pagination, search, and filtering
-- **User Management**: User registration, authentication, and role-based access (User/Manager)
+- **User Management**: User registration, authentication
 - **JWT Authentication**: Secure token-based authentication system with role-based permissions
 - **Swagger Documentation**: Interactive API documentation with Flask-RESTX
 - **Database Migrations**: Alembic-based database schema management
@@ -40,20 +40,19 @@ app/
 ### Core API Endpoints
 
 #### Book Management
-- `POST /books` - Create new book (Manager only)
+- `POST /books` - Create new book
 - `GET /books` - List books with filtering and pagination
   - Query parameters: `category`, `authors`, `min_price`, `max_price`, `start_date`, `end_date`, `search`, `page`, `per_page`
 - `GET /books/{id}` - Get specific book details
-- `PATCH /books/{id}` - Update book details (Manager only)
+- `PATCH /books/{id}` - Update book details
 
 #### User Management
 - `POST /users/signUp` - User registration
 - `POST /users/login` - User authentication
+- `POST /users/change-password` - Change user password (Authenticated users)
+- `POST /users/logout` - Invalidate user tokens
+- `GET /users/profile` - Get current user profile
 
-### Additional Endpoints (Implementation Details)
-- `GET /api/users` - List users (Manager only)
-- `GET /api/users/{id}` - Get user profile
-- `PATCH /api/users/{id}` - Update user profile
 
 ## 🛠️ Technology Stack
 
@@ -86,7 +85,6 @@ This project implements a **read-intensive book catalog system** designed accord
 ### Key Design Decisions
 - **Simplified Data Model**: Authors and categories as string fields (no complex joins)
 - **Performance-First**: 90% read, 10% write workload optimization
-- **Role-Based Security**: User/Manager role separation with JWT authentication
 - **Scalable Architecture**: Clean separation of concerns with repository pattern
 
 ### Performance Optimization Strategy
@@ -203,7 +201,7 @@ Book {
     price: float
     release_date: datetime
     stock: integer
-    creator: string (manager username who added the book)
+    creator: string (username who added the book)
 }
 ```
 
@@ -214,7 +212,7 @@ User {
     username: string (unique, indexed)
     email: string (unique, indexed)
     password_hash: string
-    user_role: string (enum: "user", "manager") # Note: Currently implemented as is_admin boolean
+    is_admin: boolean
     is_active: boolean
     created_at: datetime
     updated_at: datetime
@@ -242,7 +240,7 @@ The API uses JWT (JSON Web Tokens) for authentication:
 curl -X POST "http://localhost:5000/users/signUp" \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "john_manager",
+    "username": "john",
     "email": "john@example.com",
     "password": "securepassword123",
     "is_admin": true
@@ -254,12 +252,12 @@ curl -X POST "http://localhost:5000/users/signUp" \
 curl -X POST "http://localhost:5000/users/login" \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "john_manager",
+    "username": "john",
     "password": "securepassword123"
   }'
 ```
 
-### Creating a Book (Manager Only)
+### Creating a Book
 ```bash
 curl -X POST "http://localhost:5000/books" \
   -H "Content-Type: application/json" \
@@ -271,7 +269,7 @@ curl -X POST "http://localhost:5000/books" \
     "author": "F. Scott Fitzgerald",
     "category": "Fiction",
     "stock": 50,
-    "creator": "john_manager",
+    "creator": "john",
     "release_date": "1925-04-10"
   }'
 ```

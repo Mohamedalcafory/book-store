@@ -84,7 +84,7 @@ token_response_model = user_ns.model(
 )
 
 
-@user_ns.route('/register')
+@user_ns.route('/signUp')
 class UserRegistration(Resource):
     @user_ns.doc('register_user')
     @user_ns.expect(user_registration_model)
