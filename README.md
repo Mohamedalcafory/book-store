@@ -1,18 +1,25 @@
 # 📚 Online Book Store API
 
-A comprehensive REST API for managing an online book store built with Flask, featuring books, authors, categories, and user management with JWT authentication.
+A REST API for managing an online book store built with Flask, featuring simplified book management and user authentication. This project implements a read-intensive book catalog system optimized for performance and scalability.
 
 ## 🚀 Features
 
+### ✅ Implemented Features
 - **Book Management**: Full CRUD operations for books with pagination, search, and filtering
-- **Author Management**: Complete author lifecycle management with biography and metadata
-- **Category Management**: Organize books with categories and descriptions
-- **User Management**: User registration, authentication, and profile management
-- **JWT Authentication**: Secure token-based authentication system
+- **User Management**: User registration, authentication, and role-based access (User/Manager)
+- **JWT Authentication**: Secure token-based authentication system with role-based permissions
 - **Swagger Documentation**: Interactive API documentation with Flask-RESTX
 - **Database Migrations**: Alembic-based database schema management
 - **Input Validation**: Comprehensive data validation with Marshmallow schemas
 - **Error Handling**: Proper HTTP status codes and error responses
+- **Pagination Support**: Efficient data retrieval for large datasets
+- **Multi-parameter Filtering**: Filter books by price range, release date, category, and authors
+
+### 🚧 Planned Features
+- **Caching Layer**: Redis implementation for query result caching and performance optimization
+- **Full Dockerization**: Complete Docker Compose setup with MySQL database container
+- **Stock Notifications**: Manager notifications when book stock falls below threshold
+- **Advanced Performance**: TTL caching, LRU cache for book details, cursor-based pagination
 
 ## 🏗️ Architecture
 
@@ -30,29 +37,67 @@ app/
 
 ## 📋 API Endpoints
 
-### Books
-- `GET /api/books` - List books with pagination and filtering
-- `POST /api/books` - Create a new book
-- `GET /api/books/{id}` - Get book details
-- `PATCH /api/books/{id}` - Update book
-- `DELETE /api/books/{id}` - Delete book
+### Core API Endpoints
 
-### Users
-- `GET /api/users` - List users (admin only)
-- `POST /api/users` - Register new user
+#### Book Management
+- `POST /books` - Create new book (Manager only)
+- `GET /books` - List books with filtering and pagination
+  - Query parameters: `category`, `authors`, `min_price`, `max_price`, `start_date`, `end_date`, `search`, `page`, `per_page`
+- `GET /books/{id}` - Get specific book details
+- `PATCH /books/{id}` - Update book details (Manager only)
+
+#### User Management
+- `POST /users/signUp` - User registration
+- `POST /users/login` - User authentication
+
+### Additional Endpoints (Implementation Details)
+- `GET /api/users` - List users (Manager only)
 - `GET /api/users/{id}` - Get user profile
 - `PATCH /api/users/{id}` - Update user profile
-- `DELETE /api/users/{id}` - Delete user account
 
 ## 🛠️ Technology Stack
 
-- **Backend**: Flask 3.0.3
-- **Database**: SQLAlchemy 2.0.35 with MySQL/PostgreSQL support
-- **API Documentation**: Flask-RESTX 1.3.0
-- **Authentication**: Flask-JWT-Extended 4.6.0
-- **Data Validation**: Marshmallow 4.0.1
-- **Database Migrations**: Alembic 1.13.2
+### Core Technologies
+- **Backend Framework**: Flask 3.0.3 with Flask-RESTX 1.3.0
+- **Database**: SQLAlchemy 2.0.35 with MySQL support (SQLite for development)
+- **Authentication**: JWT (Flask-JWT-Extended 4.6.0) with role-based access control
+- **Data Validation**: Marshmallow 4.0.1 schemas for request/response validation
+- **API Documentation**: Swagger/OpenAPI via Flask-RESTX
+- **Database Migrations**: Alembic 1.13.2 for schema management
 - **Environment Management**: python-dotenv 1.0.1
+
+### Architecture Components
+1. **API Layer**: Flask-RESTX controllers for request handling
+2. **Business Logic Layer**: Service classes for core business operations  
+3. **Data Access Layer**: Repository pattern for database interactions
+4. **Authentication Layer**: JWT-based authentication system
+5. **Caching Layer**: Redis (planned for enhanced performance)
+6. **Database Layer**: MySQL for production, SQLite for development
+
+### Deployment & Containerization
+- **Containerization**: Docker with Docker Compose
+- **Current Setup**: Partial dockerization (app containerized, MySQL on host)
+- **Planned Enhancement**: Full Docker Compose with MySQL container
+
+## 🎯 System Design Highlights
+
+This project implements a **read-intensive book catalog system** designed according to the following principles:
+
+### Key Design Decisions
+- **Simplified Data Model**: Authors and categories as string fields (no complex joins)
+- **Performance-First**: 90% read, 10% write workload optimization
+- **Role-Based Security**: User/Manager role separation with JWT authentication
+- **Scalable Architecture**: Clean separation of concerns with repository pattern
+
+### Performance Optimization Strategy
+- **Query Optimization**: Composite indexing on (category, price, release_date)
+- **Efficient Pagination**: Supports large datasets without performance degradation
+- **Caching Strategy**: Planned Redis implementation for 5-minute TTL on frequent queries
+
+### Scale Estimation
+- **Data Scale**: 10,000-100,000 books, 1,000-10,000 users
+- **Query Performance**: Designed for 100-1000 QPS during peak hours
+- **Storage Estimation**: ~1KB per book, 100MB - 1GB total book data
 
 ## 🚀 Quick Start
 
@@ -133,19 +178,53 @@ FLASK_ENV=development
 FLASK_DEBUG=True
 ```
 
-## 📊 Database Schema
+## 📊 Database Schema (Simplified Design)
+
+### Design Decision: Simplified vs Normalized
+**Chosen Approach**: Simplified design with authors and categories as string fields within Book entity.
+
+**Rationale**:
+- Reduces complexity for read-heavy workloads
+- Eliminates need for complex joins  
+- Faster query performance for filtering operations
+- Aligns with assignment scope (no complex author/category management required)
+- Easier to implement and maintain
 
 ### Core Models
 
-- **User**: User accounts with authentication
-- **Author**: Book authors with biography and metadata
-- **Category**: Book categories for organization
-- **Book**: Books with relationships to authors and categories
+#### Book Entity (Primary Model)
+```python
+Book {
+    id: long (PK)
+    title: string (indexed)
+    authors: string (e.g., "Stephen King, Peter Straub")
+    category: string (indexed, e.g., "Fiction", "Horror", "Science")
+    description: text
+    price: float
+    release_date: datetime
+    stock: integer
+    creator: string (manager username who added the book)
+}
+```
 
-### Relationships
-- Author → Books (One-to-Many)
-- Category → Books (One-to-Many)
-- User → Books (One-to-Many, for book creators)
+#### User Entity
+```python
+User {
+    id: long (PK)
+    username: string (unique, indexed)
+    email: string (unique, indexed)
+    password_hash: string
+    user_role: string (enum: "user", "manager") # Note: Currently implemented as is_admin boolean
+    is_active: boolean
+    created_at: datetime
+    updated_at: datetime
+}
+```
+
+### Performance Optimizations
+- **Database Indexing**: Primary index on book title, composite index on (category, price, release_date)
+- **Query Performance**: 90% read, 10% write (read-intensive application)
+- **Scale Estimation**: 10,000-100,000 books, 1,000-10,000 users
 
 ## 🔐 Authentication
 
@@ -158,31 +237,85 @@ The API uses JWT (JSON Web Tokens) for authentication:
 
 ## 📝 Example Usage
 
-### Creating a Book
-
+### User Registration
 ```bash
-curl -X POST "http://localhost:5000/api/books" \
+curl -X POST "http://localhost:5000/users/signUp" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "john_manager",
+    "email": "john@example.com",
+    "password": "securepassword123",
+    "is_admin": true
+  }'
+```
+
+### User Login
+```bash
+curl -X POST "http://localhost:5000/users/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "john_manager",
+    "password": "securepassword123"
+  }'
+```
+
+### Creating a Book (Manager Only)
+```bash
+curl -X POST "http://localhost:5000/books" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <your-token>" \
   -d '{
     "title": "The Great Gatsby",
     "description": "A classic American novel",
     "price": 12.99,
-    "author": Omar,
-    "category": Fiction,
+    "author": "F. Scott Fitzgerald",
+    "category": "Fiction",
     "stock": 50,
-    "creator": "admin"
+    "creator": "john_manager",
+    "release_date": "1925-04-10"
   }'
 ```
 
-### Listing Authors with Search
-
+### Listing Books with Filtering
 ```bash
-curl "http://localhost:5000/api/authors?search=Fitzgerald&page=1&per_page=10"
+# Basic listing with pagination
+curl "http://localhost:5000/books?page=1&per_page=10"
+
+# Filter by category and price range
+curl "http://localhost:5000/books?category=Fiction&min_price=10.00&max_price=20.00"
+
+# Search in title and description
+curl "http://localhost:5000/books?search=gatsby&page=1&per_page=10"
+```
+
+### API Response Format
+```json
+{
+  "books": [
+    {
+      "id": 1,
+      "title": "The Great Gatsby",
+      "author": "F. Scott Fitzgerald",
+      "category": "Fiction",
+      "price": 12.99,
+      "stock": 50,
+      "release_date": "1925-04-10"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "per_page": 10,
+    "total": 150,
+    "pages": 15,
+    "has_next": true,
+    "has_prev": false
+  }
+}
 ```
 
 ## 🐳 Docker Support
 
+### Current Implementation (Partial Dockerization)
 The application includes Docker configuration for easy deployment:
 
 ```bash
@@ -190,60 +323,18 @@ The application includes Docker configuration for easy deployment:
 docker-compose up --build
 ```
 
-### ⚠️ Important Note for First Dockerized Version (commit f15a07078e034cfd90621a53586898ee823f901f)
+### ⚠️ Current Limitation: External MySQL Dependency
 
-The first dockerized version of this application **depends on a MySQL server running on the host machine**, not a MySQL Docker image. This means:
+**Current Status**: The application is containerized but **depends on a MySQL server running on the host machine**, not a MySQL Docker container.
 
-1. **You must have MySQL installed and running on your host machine** (not in Docker)
-2. **MySQL must be configured to accept connections from Docker containers**
-3. **The application connects to MySQL via `host.docker.internal:3306`**
-4. **Intialize your database with init.sql script**
+**Current Setup Requirements**:
+1. **MySQL installed and running on your host machine** (not in Docker)
+2. **MySQL configured to accept connections from Docker containers**
+3. **Application connects to MySQL via `host.docker.internal:3306`**
+4. **Initialize your database with `init.sql` script**
 5. **Run `flask db upgrade` for updating your database**
 
-#### Prerequisites for Docker Setup:
+#### Prerequisites for Current Docker Setup:
 - MySQL server installed and running on host machine
 - MySQL user with proper permissions for external connections
 - Database `bookstore` created on the host MySQL instance
-
-#### Alternative: Use Host Networking
-If you prefer to avoid MySQL configuration changes, you can modify `docker-compose.yml` to use host networking:
-```yaml
-services:
-  app:
-    # ... other config
-    network_mode: host
-    environment:
-      - DATABASE_URL=mysql+pymysql://root:admin@localhost:3306/bookstore
-```
-
-## 📈 Performance Features
-
-- **Pagination**: All list endpoints support pagination
-- **Search & Filtering**: Search by name, filter by category/author
-- **Database Indexing**: Optimized queries with proper indexing
-- **Input Validation**: Comprehensive data validation
-- **Error Handling**: Proper HTTP status codes and error messages
-
-## 🔒 Security Features
-
-- **JWT Authentication**: Secure token-based authentication
-- **Input Validation**: Comprehensive data validation and sanitization
-- **SQL Injection Protection**: SQLAlchemy ORM prevents SQL injection
-- **CORS Support**: Configurable Cross-Origin Resource Sharing
-- **Rate Limiting**: Built-in request rate limiting (configurable)
-
-
-## 🗺️ Roadmap
-
-- [ ] Advanced search with full-text search
-- [ ] Book reviews and ratings
-- [ ] Shopping cart functionality
-- [ ] Order management system
-- [ ] Email notifications
-- [ ] File upload for book covers
-- [ ] Advanced analytics and reporting
-- [ ] Multi-language support
-
----
-
-**Happy Coding! 📚✨**
