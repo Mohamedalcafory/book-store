@@ -1,4 +1,5 @@
 from typing import List, Tuple, Optional
+from datetime import date
 from app.models.book import Book
 from app.repositories.book_repository import BookRepository
 
@@ -33,14 +34,19 @@ class BookService:
         per_page: int = 10,
         author: Optional[str] = None,
         category: Optional[str] = None,
+        price: Optional[float] = None,
+        release_date: Optional[date] = None,
         search: Optional[str] = None
     ) -> Tuple[List[Book], int]:
+        print(price, release_date)
         """Get paginated books with optional filtering"""
         paginated_books, total = self.book_repository.get_paginated(
             page=page,
             per_page=per_page,
             author=author,
             category=category,
+            price=price,
+            release_date=release_date,
             search=search
         )
         return paginated_books, total

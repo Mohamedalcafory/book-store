@@ -1,4 +1,5 @@
 from typing import Optional, Tuple, List
+from datetime import date
 
 from app import db
 from app.models.book import Book
@@ -32,6 +33,8 @@ class BookRepository:
         per_page: int = 10,
         author: Optional[str] = None,
         category: Optional[str] = None,
+        price: Optional[float] = None,
+        release_date: Optional[date] = None,
         search: Optional[str] = None
     ) -> Tuple[List[Book], int]:
         query = Book.query
@@ -39,6 +42,10 @@ class BookRepository:
             query = query.filter(Book.author.ilike(f"%{author}%"))
         if category:
             query = query.filter(Book.category.ilike(f"%{category}%"))
+        if price:
+            query = query.filter(Book.price == price)
+        if release_date:
+            query = query.filter(Book.release_date == release_date)
         if search:
             query = query.filter(
                 Book.title.ilike(f"%{search}%") |

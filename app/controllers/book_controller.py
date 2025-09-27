@@ -2,6 +2,7 @@ from flask import request
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import jwt_required
 from typing import Dict, Any
+from datetime import date
 
 from flask import Blueprint
 
@@ -105,23 +106,31 @@ class BookList(Resource):
     @book_ns.marshal_with(book_list_model)  # Serializes the response using book_list_model
     @book_ns.response(401, 'Authentication required')  # Documents that this endpoint requires authentication
     @book_ns.response(500, 'Internal Server Error')  # Documents that this endpoint may return a 500 error
-    @book_ns.param('page', 'Page number', type=int, default=1)
-    @book_ns.param('per_page', 'Items per page (max 100)', type=int, default=10)
-    @book_ns.param('author', 'Filter by author name', type=str)
-    @book_ns.param('category', 'Filter by category name', type=str)
-    @book_ns.param('search', 'Search books by title', type=str)
+    @book_ns.expect(book_ns.parser()
+        .add_argument('page', type=int, default=1, help='Page number')
+        .add_argument('per_page', type=int, default=10, help='Items per page (max 100)')
+        .add_argument('author', type=str, help='Filter by author name')
+        .add_argument('category', type=str, help='Filter by category name')
+        .add_argument('search', type=str, help='Search books by title')
+        .add_argument('price', type=float, help='Filter by price')
+        .add_argument('release_date', type=date, help='Filter by release date'))
     @jwt_required()
     def get(self):
         """List books with optional filtering and pagination"""
         try:
-            print("get books")
             # Extract query parameters
             page = request.args.get('page', 1, type=int)
             per_page = request.args.get('per_page', 10, type=int)
             author = request.args.get('author', type=str)
             category = request.args.get('category', type=str)
             search = request.args.get('search', type=str)
-            
+            price = request.args.get('price', type=float)
+            release_date = request.args.get('release_date', type=str)
+            try:
+                release_date = date.fromisoformat(release_date)
+            except ValueError:
+                release_date = None
+            print(price, release_date)
             # Validate pagination parameters
             if page < 1:
                 page = 1
@@ -133,7 +142,9 @@ class BookList(Resource):
                 per_page=per_page,
                 author=author,
                 category=category,
-                search=search
+                search=search,
+                price=price,
+                release_date=release_date
             )
             schema = BookResponseSchema(many=True)
             return {
