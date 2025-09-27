@@ -108,7 +108,7 @@ This project implements a **read-intensive book catalog system** designed accord
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Mohamedalcafory/book-store.git
    cd book-store
    ```
 
